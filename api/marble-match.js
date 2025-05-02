@@ -19,7 +19,6 @@ export default async function handler(req, res) {
 
     // Build OpenAI prompt with your bank
     const systemPrompt = `
-const systemPrompt = `
 You are a marble identification expert trained in Italian and exotic stone types.
 
 You will receive an image of a marble slab. Compare it visually and stylistically to the following marble bank, which includes reference images, price, and traits.
