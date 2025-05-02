@@ -1,11 +1,9 @@
 module.exports = async function handler(req, res) {
-};
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
   const { imageBase64 } = req.body;
-
   if (!imageBase64) {
     return res.status(400).json({ error: "Image is required" });
   }
@@ -14,11 +12,10 @@ module.exports = async function handler(req, res) {
     const marbleBankUrl = process.env.MARBLE_BANK_URL;
     const openaiKey = process.env.OPENAI_API_KEY;
 
-    // Fetch marble reference bank
+    // ✅ Await is now inside the async handler
     const refRes = await fetch(marbleBankUrl);
     const marbleData = await refRes.json();
 
-    // Build OpenAI prompt with your bank
     const systemPrompt = `
 You are a marble identification expert trained in Italian and exotic stone types.
 
@@ -47,8 +44,6 @@ ${JSON.stringify(marbleData.slice(0, 30))}
 Be concise, accurate, and confident.
 `;
 
-
-    // GPT-4 Vision call
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -78,7 +73,7 @@ Be concise, accurate, and confident.
 
     return res.status(200).json({ match: message || "No match found." });
   } catch (err) {
-    console.error("Error in marble-match handler:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("🔥 Error in marble-match handler:", err);
+    return res.status(500).json({ error: err.message || "Internal server error" });
   }
-}
+};
