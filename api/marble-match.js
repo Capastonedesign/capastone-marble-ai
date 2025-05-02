@@ -19,13 +19,34 @@ export default async function handler(req, res) {
 
     // Build OpenAI prompt with your bank
     const systemPrompt = `
-You are a marble identification expert.
-Your job is to match a photo of a marble slab to the most likely marble from this list.
-Each entry includes: name, origin, price, rarity, and best use.
-Return: the closest match, estimated confidence, and brief explanation.
+const systemPrompt = `
+You are a marble identification expert trained in Italian and exotic stone types.
 
-Marble Reference Bank: ${JSON.stringify(marbleData.slice(0, 30))}
-    `;
+You will receive an image of a marble slab. Compare it visually and stylistically to the following marble bank, which includes reference images, price, and traits.
+
+Match the image to the most visually similar marble. Focus on:
+- Vein direction (linear, webbed, clustered)
+- Contrast (low vs high)
+- Color (white, grey, gold, purple)
+- Pattern (egg-shaped clusters, clouds, lightning veins)
+
+Then return:
+- Marble Name
+- Origin
+- Price Range
+- Rarity
+- Pattern Description (1 line)
+- Why it matches (1 paragraph)
+- Match confidence score (0–100)
+
+If the match is uncertain, include: “This result is our best guess. We recommend confirming via consultation.”
+
+Marble Reference Bank:
+${JSON.stringify(marbleData.slice(0, 30))}
+
+Be concise, accurate, and confident.
+`;
+
 
     // GPT-4 Vision call
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
