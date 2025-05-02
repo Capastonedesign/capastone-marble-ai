@@ -1,30 +1,33 @@
-// /api/marble-match.js
-
 export default async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  const { imageBase64 } = req.body;
+
+  if (!imageBase64) {
+    return res.status(400).json({ error: "Image is required" });
+  }
+
   try {
-    const { imageBase64 } = req.body;
-
-    if (!imageBase64 || !imageBase64.startsWith("data:image")) {
-      return res.status(400).json({ error: "Valid image is required" });
-    }
-
     const marbleBankUrl = process.env.MARBLE_BANK_URL;
     const openaiKey = process.env.OPENAI_API_KEY;
 
-    // Fetch marble reference bank
     const refRes = await fetch(marbleBankUrl);
     const marbleData = await refRes.json();
 
-    // Build OpenAI system prompt
     const systemPrompt = `
 You are a marble identification expert trained in Italian and exotic stone types.
-
-You will receive an image of a marble slab. Compare it visually and stylistically to the following marble bank, which includes reference images, price, and traits.
-
+You will receive an image of a marble slab. Compare it visually and stylistically to the following marble bank.
 Match the image to the most visually similar marble. Focus on:
 - Vein direction (linear, webbed, clustered)
 - Contrast (low vs high)
@@ -40,15 +43,12 @@ Then return:
 - Why it matches (1 paragraph)
 - Match confidence score (0–100)
 
-If the match is uncertain, include: "This result is our best guess. We recommend confirming via consultation."
+If unsure: “This result is our best guess. We recommend confirming via consultation.”
 
 Marble Reference Bank:
 ${JSON.stringify(marbleData.slice(0, 30))}
+`;
 
-Be concise, accurate, and confident.
-    `;
-
-    // Call OpenAI API with vision model
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -64,9 +64,7 @@ Be concise, accurate, and confident.
             content: [
               {
                 type: "image_url",
-                image_url: {
-                  url: imageBase64,
-                },
+                image_url: { url: imageBase64 },
               },
             ],
           },
@@ -80,7 +78,7 @@ Be concise, accurate, and confident.
 
     return res.status(200).json({ match: message || "No match found." });
   } catch (err) {
-    console.error("Error in marble-match handler:", err);
+    console.error("❌ API Error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
