@@ -26,28 +26,28 @@ export default async function handler(req, res) {
     const marbleData = await refRes.json();
 
     const systemPrompt = `
-You are a marble identification expert trained in Italian and exotic stone types.
-You will receive an image of a marble slab. Compare it visually and stylistically to the following marble bank.
-Match the image to the most visually similar marble. Focus on:
-- Vein direction (linear, webbed, clustered)
-- Contrast (low vs high)
-- Color (white, grey, gold, purple)
-- Pattern (egg-shaped clusters, clouds, lightning veins)
+You are a marble identification expert trained in Italian and exotic slabs.
+You will receive an image of a marble slab. Compare it visually and stylistically to this marble reference bank.
+Focus on:
+- Vein pattern (linear, webbed, clustered, chaotic)
+- Contrast (high/low)
+- Colors (base and veins)
+- Texture (smooth, bold, soft flow)
+- Any visual resemblance to example images
 
-Then return:
-- Marble Name
+Return:
+- Best-match Marble Name
 - Origin
-- Price Range
 - Rarity
-- Pattern Description (1 line)
-- Why it matches (1 paragraph)
-- Match confidence score (0–100)
+- Pattern Summary (1 line)
+- Why you selected it (visual logic, be specific)
+- Confidence score (0–100)
 
-If unsure: “This result is our best guess. We recommend confirming via consultation.”
+Marble Reference Bank (with image links):
+${JSON.stringify(marbleData.slice(0, 50))}
 
-Marble Reference Bank:
-${JSON.stringify(marbleData.slice(0, 30))}
-`;
+If no good match, say: “No strong match. This may require human verification.”
+    `;
 
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
