@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     const marbleBankUrl = process.env.MARBLE_BANK_URL;
     const openaiKey = process.env.OPENAI_API_KEY;
 
-    const refRes = await fetch(marbleBankUrl);
+    const refRes = await fetch(MARBLE_BANK_URL);
     const marbleData = await refRes.json();
 
     const systemPrompt = `
