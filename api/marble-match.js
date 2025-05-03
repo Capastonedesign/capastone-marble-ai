@@ -27,25 +27,8 @@ export default async function handler(req, res) {
 
     const systemPrompt = `
 You are a marble identification expert trained in Italian and exotic slabs.
-You will receive an image of a marble slab. Compare it visually and stylistically to this marble reference bank.
-Focus on:
-- Vein pattern (linear, webbed, clustered, chaotic)
-- Contrast (high/low)
-- Colors (base and veins)
-- Texture (smooth, bold, soft flow)
-- Any visual resemblance to example images
-
-Return:
-- Best-match Marble Name
-- Origin
-- Rarity
-- Pattern Summary (1 line)
-- Why you selected it (visual logic, be specific)
-- Confidence score (0–100)
-
-Marble Reference Bank (with image links):
+You will receive an image of a marble slab. Compare it visually and stylistically to this marble reference bank. Marble Reference Bank (with image links):
 ${JSON.stringify(marbleData.slice(0, 50))}
-
 If no good match, say: “No strong match. This may require human verification.”
     `;
 
@@ -58,17 +41,18 @@ If no good match, say: “No strong match. This may require human verification.�
       body: JSON.stringify({
         model: "gpt-4-vision-preview",
         messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              {
-                type: "image_url",
-                image_url: { url: imageBase64 },
-              },
-            ],
-          },
-        ],
+  {
+    role: "system",
+    content: systemPrompt
+  },
+  {
+    role: "user",
+    content: [
+      { type: "text", text: "What marble is this?" },
+      { type: "image_url", image_url: { url: base64Image } }
+    ]
+  }
+]
         max_tokens: 1000,
       }),
     });
